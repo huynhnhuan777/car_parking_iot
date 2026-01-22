@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard · Smart Parking</title>
+    <style>
+        :root {
+            --bg: #020617;
+            --bg-elevated: #020617;
+            --accent: #22c55e;
+            --accent-soft: rgba(34, 197, 94, 0.16);
+            --danger: #ef4444;
+            --info: #38bdf8;
+            --border-subtle: rgba(148, 163, 184, 0.36);
+            --text-main: #e5e7eb;
+            --text-muted: #9ca3af;
+            --shadow: 0 24px 70px rgba(15, 23, 42, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top, #1f2937 0, #020617 55%, #000 100%);
+            color: var(--text-main);
+            display: flex;
+            align-items: stretch;
+            justify-content: center;
+        }
+
+        .shell {
+            width: 100%;
+            max-width: 1120px;
+            padding: 22px 16px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 3fr) minmax(0, 2.1fr);
+            gap: 18px;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .id-block {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            background:
+                radial-gradient(circle at 30% 0, #38bdf8, #22c55e 55%, #16a34a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 700;
+            color: #ecfeff;
+            box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.85),
+                        0 14px 32px rgba(22, 163, 74, 0.7);
+        }
+
+        .title-wrap h1 {
+            margin: 0 0 2px;
+            font-size: 22px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .title-wrap h1 span {
+            font-weight: 700;
+        }
+
+        .subtitle {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .admin-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(248, 250, 252, 0.4);
+            background: radial-gradient(circle at top, rgba(248, 250, 252, 0.08), transparent 55%);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+
+        .admin-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: #f97316;
+            box-shadow: 0 0 0 4px rgba(248, 171, 84, 0.35);
+        }
+
+        .card {
+            background:
+                radial-gradient(circle at top left, rgba(34, 197, 94, 0.18), transparent 50%),
+                radial-gradient(circle at bottom right, rgba(56, 189, 248, 0.18), transparent 55%),
+                var(--bg-elevated);
+            border-radius: 24px;
+            padding: 18px 18px 16px;
+            border: 1px solid var(--border-subtle);
+            box-shadow: var(--shadow);
+        }
+
+        .card + .card {
+            box-shadow: 0 18px 55px rgba(15, 23, 42, 0.9);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            background: rgba(15, 23, 42, 0.9);
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .tag-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+        }
+
+        .tag-dot.ok {
+            background: var(--accent);
+        }
+
+        .tag-dot.tunnel {
+            background: var(--info);
+        }
+
+        .tag-dot.port {
+            background: #facc15;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .metric {
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            padding: 10px 10px 9px;
+            background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.94));
+            font-size: 11px;
+        }
+
+        .metric-label {
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .metric-value.online {
+            color: var(--accent);
+        }
+
+        .metric-value.tunnel {
+            color: var(--info);
+        }
+
+        .metric-value.port {
+            color: #fde68a;
+        }
+
+        .metric-caption {
+            margin-top: 2px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .list {
+            margin: 0;
+            padding-left: 16px;
+            font-size: 13px;
+            color: var(--text-main);
+        }
+
+        .list li {
+            margin-bottom: 6px;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 11px;
+        }
+
+        .pill.soon {
+            border: 1px dashed rgba(148, 163, 184, 0.9);
+            color: var(--text-muted);
+        }
+
+        .pill-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: #f97316;
+        }
+
+        .logout-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 12px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .logout a {
+            text-decoration: none;
+            border-radius: 999px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: #fef2f2;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 16px 35px rgba(185, 28, 28, 0.75);
+        }
+
+        .logout a:hover {
+            filter: brightness(1.06);
+            transform: translateY(-1px);
+        }
+
+        .logout a:active {
+            transform: translateY(0);
+            box-shadow: 0 10px 24px rgba(185, 28, 28, 0.8);
+        }
+
+        .logout-icon {
+            font-size: 14px;
+        }
+
+        .timeline {
+            margin: 0;
+            padding-left: 0;
+            list-style: none;
+            font-size: 13px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 18px;
+            margin-bottom: 10px;
+        }
+
+        .timeline-item::before {
+            content: "";
+            position: absolute;
+            left: 6px;
+            top: 4px;
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.8);
+        }
+
+        .timeline-item::after {
+            content: "";
+            position: absolute;
+            left: 9px;
+            top: 14px;
+            bottom: -6px;
+            width: 1px;
+            background: rgba(55, 65, 81, 0.9);
+        }
+
+        .timeline-item:last-child::after {
+            display: none;
+        }
+
+        .timeline-title {
+            font-weight: 500;
+        }
+
+        .timeline-caption {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .footer {
+            margin-top: 14px;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: right;
+        }
+
+        @media (max-width: 880px) {
+            .shell {
+                padding: 16px 12px 18px;
+            }
+
+            .layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .card {
+                border-radius: 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .avatar {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+
+            .title-wrap h1 {
+                font-size: 19px;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="shell">
+    <header class="header">
+        <div class="id-block">
+            <div class="title-wrap">
+                <h1><span>Admin</span> Control Panel</h1>
+                <p class="subtitle">Xin chào, <strong>{{ admin_name }}</strong> · Điều phối hệ thống bãi đỗ xe thông minh</p>
+            </div>
+        </div>
+        <div class="admin-badge">
+            <span class="admin-dot"></span>
+            <span>Privileged access · Admin</span>
+        </div>
+    </header>
+
+    <main class="layout">
+        <section class="card">
+            <div class="card-header">
+                <div class="card-title">Trạng thái hệ thống</div>
+                <div class="tag">
+                    <span class="tag-dot ok"></span>
+                    <span>Live</span>
+                </div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric">
+                    <div class="metric-label">Server</div>
+                    <div class="metric-value online">Online</div>
+                    <div class="metric-caption">Dịch vụ Flask đang chạy ổn định.</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Tunnel</div>
+                    <div class="metric-value tunnel">Connected</div>
+                    <div class="metric-caption">Cloudflare Tunnel đang hoạt động.</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-label">Local Port</div>
+                    <div class="metric-value port">5000</div>
+                    <div class="metric-caption">Cổng nội bộ cho gateway & dashboard.</div>
+                </div>
+            </div>
+
+            <ul class="list">
+                <li>Toàn bộ trạng thái hệ thống được cập nhật từ backend hiện tại (không thay đổi logic).</li>
+                <li>Admin có thể sử dụng trang này như điểm tham chiếu nhanh cho tình trạng gateway & kết nối.</li>
+            </ul>
+
+            <div class="logout-row">
+                <span>Khi hoàn tất, hãy đăng xuất để bảo vệ khu vực quản trị.</span>
+                <div class="logout">
+                    <a href="/admin/logout">
+                        <span>Đăng xuất</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <aside class="card">
+            <div class="card-header">
+                <div class="card-title">Chức năng quản trị</div>
+                <div class="tag">
+                    <span class="tag-dot port"></span>
+                    <span>Roadmap</span>
+                </div>
+            </div>
+
+            <ul class="timeline">
+                <li class="timeline-item">
+                    <div class="timeline-title">
+                        Quản lý tài khoản Admin
+                        <span class="pill soon">
+                            <span class="pill-dot"></span>
+                            Coming soon
+                        </span>
+                    </div>
+                    <div class="timeline-caption">
+                        Tạo / khoá / phân quyền các tài khoản quản trị viên theo vai trò.
+                    </div>
+                </li>
+                <li class="timeline-item">
+                    <div class="timeline-title">
+                        Xem dữ liệu IoT / Sensor
+                        <span class="pill soon">
+                            <span class="pill-dot"></span>
+                            Coming soon
+                        </span>
+                    </div>
+                    <div class="timeline-caption">
+                        Lịch sử trạng thái chỗ đậu, log cảm biến, và biểu đồ thống kê theo thời gian.
+                    </div>
+                </li>
+                <li class="timeline-item">
+                    <div class="timeline-title">
+                        Quản lý thiết bị
+                        <span class="pill soon">
+                            <span class="pill-dot"></span>
+                            Coming soon
+                        </span>
+                    </div>
+                    <div class="timeline-caption">
+                        Theo dõi gateway, node cảm biến, cập nhật cấu hình và tình trạng kết nối.
+                    </div>
+                </li>
+            </ul>
+
+            <div class="footer">
+                Giao diện chỉ thay đổi phần hiển thị phía frontend · Backend & API giữ nguyên theo thiết kế ban đầu.
+            </div>
+        </aside>
+    </main>
+</div>
+
+</body>
+</html>

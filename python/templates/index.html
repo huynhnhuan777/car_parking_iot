@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Parking</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --bg-dark: #050816;
+            --bg-card: #0f172a;
+            --accent: #22c55e;
+            --accent-soft: rgba(34, 197, 94, 0.1);
+            --danger: #ef4444;
+            --danger-soft: rgba(239, 68, 68, 0.1);
+            --border-subtle: rgba(148, 163, 184, 0.35);
+            --text-main: #e5e7eb;
+            --text-muted: #9ca3af;
+            --radius-lg: 18px;
+            --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.65);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: radial-gradient(circle at top, #1d293b 0, #020617 55%, #000 100%);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-shell {
+            width: 100%;
+            max-width: 1120px;
+            padding: 24px 16px;
+        }
+
+        .app-card {
+            position: relative;
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 0.96));
+            border-radius: 28px;
+            padding: 24px 22px 26px;
+            box-shadow: var(--shadow-soft);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            overflow: hidden;
+        }
+
+        .app-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.18), transparent 55%),
+                radial-gradient(circle at bottom right, rgba(52, 211, 153, 0.16), transparent 55%);
+            opacity: 0.85;
+            pointer-events: none;
+        }
+
+        .app-card-inner {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .title-group {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .logo-pill {
+            width: 44px;
+            height: 44px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 0, #38bdf8, #22c55e 55%, #16a34a 100%);
+            box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.85), 0 12px 28px rgba(34, 197, 94, 0.55);
+            color: #ecfeff;
+            font-size: 22px;
+        }
+
+        h1 {
+            margin: 0 0 4px;
+            font-size: 24px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h1 span {
+            font-weight: 700;
+        }
+
+        .subtitle {
+            margin: 0;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .status-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(18px);
+        }
+
+        .badge-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: var(--accent);
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.25);
+        }
+
+        .badge-secondary {
+            border-color: rgba(148, 163, 184, 0.3);
+            background: rgba(15, 23, 42, 0.75);
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(0, 2.1fr) minmax(0, 1.2fr);
+            gap: 18px;
+        }
+
+        .panel {
+            background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.96));
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            padding: 14px 14px 16px;
+            backdrop-filter: blur(16px);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .panel-title {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+        }
+
+        .chip-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .chip-indicator {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+        }
+
+        .chip-indicator.available {
+            background: var(--accent);
+        }
+
+        .chip-indicator.occupied {
+            background: var(--danger);
+        }
+
+        .chip-indicator.total {
+            background: #38bdf8;
+        }
+
+        .chip-label {
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .metric-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .metric-label {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .metric-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .metric-caption {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .refresh-indicator {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .refresh-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.7);
+            border-top-color: #38bdf8;
+            border-right-color: #38bdf8;
+            animation: spin 1.2s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+        }
+
+        .slot {
+            position: relative;
+            padding: 14px 12px;
+            border-radius: 14px;
+            border: 1px solid var(--border-subtle);
+            background: radial-gradient(circle at top, rgba(15, 23, 42, 0.96), rgba(15, 23, 42, 0.94));
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 72px;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .slot::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            opacity: 0.38;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+
+        .slot.empty::before {
+            background: radial-gradient(circle at top, rgba(34, 197, 94, 0.45), transparent 55%);
+        }
+
+        .slot.occupied::before {
+            background: radial-gradient(circle at top, rgba(239, 68, 68, 0.55), transparent 55%);
+        }
+
+        .slot-id {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            z-index: 1;
+        }
+
+        .slot-dot {
+            position: absolute;
+            top: 7px;
+            right: 9px;
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15);
+            z-index: 1;
+        }
+
+        .slot-dot.empty {
+            background: var(--accent);
+        }
+
+        .slot-dot.occupied {
+            background: var(--danger);
+            box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.18);
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 10px;
+            margin-top: 8px;
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+        }
+
+        .legend-swatch.available {
+            background: linear-gradient(135deg, var(--accent-soft), var(--accent));
+        }
+
+        .legend-swatch.occupied {
+            background: linear-gradient(135deg, var(--danger-soft), var(--danger));
+        }
+
+        .footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 16px;
+            font-size: 11px;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(148, 163, 184, 0.3);
+            padding-top: 10px;
+        }
+
+        .footer span {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 880px) {
+            .app-card {
+                padding: 18px 14px 20px;
+            }
+
+            .layout {
+                grid-template-columns: minmax(0, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .page-shell {
+                padding: 14px 10px;
+            }
+
+            h1 {
+                font-size: 19px;
+            }
+
+            .logo-pill {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-shell">
+    <div class="app-card">
+        <div class="app-card-inner">
+            <header class="header">
+                <div class="title-group">
+                    <div>
+                        <h1><span>SMART</span> PARKING HUB</h1>
+                        <p class="subtitle">Giám sát thời gian thực trạng thái bãi đỗ xe</p>
+                    </div>
+                </div>
+                <div class="status-badges">
+                    <div class="badge">
+                        <span class="badge-dot"></span>
+                        <span>Realtime · 1s auto refresh</span>
+                    </div>
+                    <div class="badge badge-secondary">
+                        <span>Powered by IoT Gateway</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="layout">
+                <section class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Sơ đồ bãi đỗ</div>
+                        <div class="chip-group">
+                            <div class="chip">
+                                <span class="chip-indicator total"></span>
+                                <span class="chip-label">Tổng</span>
+                            </div>
+                            <div class="chip">
+                                <span class="chip-indicator available"></span>
+                                <span class="chip-label">Còn trống</span>
+                            </div>
+                            <div class="chip">
+                                <span class="chip-indicator occupied"></span>
+                                <span class="chip-label">Đã chiếm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="slots" id="slots"></div>
+
+                    <div class="legend">
+                        <div class="legend-item">
+                            <span class="legend-swatch available"></span>
+                            <span>Chỗ còn trống có thể sử dụng</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-swatch occupied"></span>
+                            <span>Chỗ đang có xe / không khả dụng</span>
+                        </div>
+                    </div>
+                </section>
+
+                <aside class="panel">
+                    <div class="panel-header">
+                        <div class="panel-title">Tổng quan</div>
+                        <div class="refresh-indicator">
+                            <span class="refresh-dot"></span>
+                            <span>Cập nhật mỗi 1 giây</span>
+                        </div>
+                    </div>
+
+                    <div class="metric-row">
+                        <div>
+                            <div class="metric-label">Số chỗ còn trống</div>
+                            <div class="metric-value"><span id="total">0</span></div>
+                        </div>
+                    </div>
+
+                    <!-- <p class="metric-caption">
+                        Thông tin được lấy trực tiếp từ cảm biến tại từng vị trí đậu xe, giúp tối ưu hoá việc vận hành
+                        bãi đỗ và giảm thời gian tìm chỗ cho tài xế.
+                    </p> -->
+                </aside>
+            </main>
+
+            <footer class="footer">
+                <span>Hệ thống bãi đỗ xe thông minh · Giám sát & điều khiển từ xa</span>
+            </footer>
+        </div>
+    </div>
+</div>
+
+<script>
+async function loadStatus() {
+    try {
+        const res = await fetch('/api/dashboard');
+        if (!res.ok) return;
+
+        const data = await res.json();
+
+        const totalEl = document.getElementById('total');
+        if (totalEl) {
+            totalEl.innerText = data.total_available;
+        }
+
+        const container = document.getElementById('slots');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        data.slots.forEach(slot => {
+            const div = document.createElement('div');
+            const isOccupied = !!slot.is_occupied;
+
+            div.className = 'slot ' + (isOccupied ? 'occupied' : 'empty');
+
+            const id = document.createElement('div');
+            id.className = 'slot-id';
+            id.textContent = `#${slot.slot_id}`;
+
+            const dot = document.createElement('span');
+            dot.className = 'slot-dot ' + (isOccupied ? 'occupied' : 'empty');
+
+            div.appendChild(id);
+            div.appendChild(dot);
+
+            container.appendChild(div);
+        });
+    } catch (e) {
+        // Để im lặng, tránh làm hỏng UI nếu backend tạm thời lỗi
+    }
+}
+
+// Tự refresh mỗi 1s
+setInterval(loadStatus, 1000);
+loadStatus();
+</script>
+
+</body>
+</html>

@@ -111,5 +111,23 @@ def admin_index():
         admin_name=session.get('admin_name', 'Admin')
     )
 
+@app.route('/api/logs')
+def get_logs():
+    db = get_db_connection()
+    cursor = db.cursor(dictionary=True)
+
+    cursor.execute("""
+        SELECT action_type, total_available, created_at
+        FROM parking_logs
+        ORDER BY created_at DESC
+        LIMIT 50
+    """)
+
+    logs = cursor.fetchall()
+    cursor.close()
+    db.close()
+
+    return jsonify(logs)
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
